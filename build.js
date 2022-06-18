@@ -45,6 +45,7 @@ function processDocumentationFile(file) {
   }
   let content = fs.readFileSync(file, 'utf-8');
 
+  let relativeFilepath = file.replace(options.DocumentsDir + '/', '');
   /**
    * 函数名称
    */
@@ -53,11 +54,11 @@ function processDocumentationFile(file) {
   let functionName = content.match(functionNameRegex)
   if (functionName) {
     items.push({
-      name: functionName[0], type: 'Guide', path: file
+      name: functionName[0], type: 'Guide', path: relativeFilepath
     })
     if (functionSampleRegex) {
       items.push({
-        name: functionName[0], type: 'Sample', path: file
+        name: functionName[0], type: 'Sample', path: relativeFilepath
       })
     }
   }
@@ -83,7 +84,7 @@ function createSearchIndex(items) {
       type: Sequelize.STRING
     }
   }, {
-    freezeTableName: true, timestamps: false, omitNull: true
+    freezeTableName: true, timestamps: false
   });
 
   SearchIndex.sync().then(function () {
