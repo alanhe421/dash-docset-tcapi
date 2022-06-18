@@ -11,6 +11,7 @@ const options = {
   docsetDir: path.join(__dirname + '/tcapi.docset'), // docset目标文件夹
   contentsDir: null, resourceDir: null,
 };
+const homePage = 'https://cloud.tencent.com/document';
 options.contentsDir = path.join(options.docsetDir, 'Contents');
 options.DocumentsDir = path.join(options.contentsDir, 'Resources', 'Documents');
 
@@ -69,7 +70,7 @@ function processDocumentationFile(file) {
   if (relativePath.includes('/')) {
     fs.mkdirSync(path.join(options.DocumentsDir, relativePath.replace(/\/[^/]+$/, '')), {recursive: true});
   }
-  fs.writeFileSync(path.join(options.DocumentsDir, relativePath), htmlProcess(content))
+  fs.writeFileSync(path.join(options.DocumentsDir, relativePath), htmlProcess(content, relativePath))
   return items
 }
 
@@ -78,7 +79,7 @@ function processDocumentationFile(file) {
  * 删除部分DOM元素
  * 样式调整为本地资源路径
  */
-function htmlProcess(htmlCnt) {
+function htmlProcess(htmlCnt, relativePath) {
   htmlCnt = htmlCnt.replace(/\/\/cloudcache.tencent-cloud.com\/open_proj\/proj_qcloud_v2\/platform\/documents\/css/g, '_static');
   let $ = cheerio.load(htmlCnt);
   // $('#qcportal-kit-topnav').remove();
@@ -89,6 +90,8 @@ function htmlProcess(htmlCnt) {
       link.attribs.href = link.attribs.href.replace(/\/document\/api/, 'api') + '.html';
     }
   });
+  // Support Online Redirection https://kapeli.com/docsets#onlineRedirection
+  $('html').append(`<!-- Online page at ${homePage}${relativePath.replace(/.html$/, '')} -->`)
   return $.html();
 }
 
