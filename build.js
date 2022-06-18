@@ -16,23 +16,23 @@ options.DocumentsDir = path.join(options.contentsDir, 'Resources', 'Documents');
 
 sqlite3.verbose();
 
-function processDocumentation() {
+function copyDocumentation() {
   let items = [];
   const files = fs.readdirSync(options.sourceDir);
   _.each(files, function (file) {
     items = _.union(items, processDocumentationFile(path.join(options.sourceDir, file)));
   });
-  createDB(items);
+  return items;
 }
 
-(function main() {
-  copyFiles();
-  processDocumentation();
+(async function main() {
+  const items = copyDocumentation();
+  copyConfigFiles();
+  await createSqlLiteDB(items);
   console.log('Generate Docset Successfully! ')
 })();
 
-
-function copyFiles() {
+function copyConfigFiles() {
   fs.createReadStream('Info.plist').pipe(fs.createWriteStream(path.join(options.contentsDir, 'Info.plist')));
   fs.createReadStream('icon.png').pipe(fs.createWriteStream(path.join(options.docsetDir, 'icon.png')));
   if (!fs.existsSync(path.join(options.DocumentsDir, '_static'))) {
@@ -99,7 +99,7 @@ function htmlProcess(htmlCnt) {
  * @param items
  * @returns {Promise<void>}
  */
-async function createDB(items) {
+async function createSqlLiteDB(items) {
   let sqlFile = path.join(options.contentsDir, 'docSet.dsidx');
   if (fs.existsSync(sqlFile)) {
     fs.unlinkSync(sqlFile);
