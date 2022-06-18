@@ -1,0 +1,25 @@
+{
+  "name": "dash-docset-tcapi",
+  "version": "1.0.0",
+  "description": "腾讯云API文档，云API文档地址：https://cloud.tencent.com/document/api",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alanhg/dash-docset-tcapi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alanhg/dash-docset-tcapi/issues"
+  },
+  "homepage": "https://github.com/alanhg/dash-docset-tcapi#readme",
+  "dependencies": {
+    "sequelize": "^6.21.0",
+    "sqlite3": "^5.0.8",
+    "underscore": "^1.13.4"
+  }
+}
