@@ -28,6 +28,7 @@ function processDocumentation() {
 (function main() {
   copyFiles();
   processDocumentation();
+  console.log('Generate Docset Successfully! ')
 })();
 
 
@@ -40,7 +41,9 @@ function copyFiles() {
   fs.createReadStream('_static/documents-202205161915.css').pipe(fs.createWriteStream(path.join(options.DocumentsDir, '_static', '/documents-202205161915.css')));
 }
 
-
+/**
+ * 只处理HTML文件
+ */
 function processDocumentationFile(file) {
   const items = [];
   if (fs.lstatSync(file).isDirectory()) {
