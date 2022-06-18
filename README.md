@@ -15,11 +15,8 @@ mkdir -p tcapi.docset/Contents/Resources/Documents/
 # 配置info.plist，参考例子https://kapeli.com/resources/Info.plist
 vi Info.plist
 
-# 创建索引
-cd tcapi.docset/Contents/Resources
-sqlite3 docSet.dsidx
-
-# 
+# 生成索引数据
+node build.js
 ```
 
 
