@@ -13,7 +13,8 @@ const options = {
 };
 const homePage = 'https://cloud.tencent.com/document';
 options.contentsDir = path.join(options.docsetDir, 'Contents');
-options.DocumentsDir = path.join(options.contentsDir, 'Resources', 'Documents');
+options.ResourcesDir = path.join(options.contentsDir, 'Resources');
+options.DocumentsDir = path.join(options.ResourcesDir, 'Documents');
 
 sqlite3.verbose();
 
@@ -103,7 +104,7 @@ function htmlProcess(htmlCnt, relativePath) {
  * @returns {Promise<void>}
  */
 async function createSqlLiteDB(items) {
-  let sqlFile = path.join(options.contentsDir, 'docSet.dsidx');
+  let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
   if (fs.existsSync(sqlFile)) {
     fs.unlinkSync(sqlFile);
   }
