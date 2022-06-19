@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleIdentifier</key>
+<key>CFBundleIdentifier</key>
+<string>tcapi</string>
+<key>DashDocSetFamily</key>
+<string>dashtoc</string>
+<key>CFBundleName</key>
+<string>腾讯云API</string>
+<key>DashDocSetNameShorteningFamily</key>
+<string>tcapi</string>
+<key>DocSetPlatformFamily</key>
+<string>tcapi</string>
+<key>dashIndexFilePath</key>
+<string>https://cloud.tencent.com/document/api</string>
+	<key>DashDocSetPlugin</key>
 	<string>tcapi</string>
-	<key>CFBundleName</key>
-	<string>腾讯云API</string>
-	<key>DocSetPlatformFamily</key>
-	<string>tcapi</string>
-	<key>isDashDocset</key>
-	<true/>
-	<key>dashIndexFilePath</key>
-    <string>https://cloud.tencent.com/document/api</string>
-    <key>DashDocSetDefaultFTSEnabled</key><true/>
+		<key>isDashDocset</key>
+    	<true/>
 </dict>
 </plist>
+

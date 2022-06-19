@@ -9,7 +9,6 @@ const {hideBin} = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv;
 
 const sqlite3 = require('sqlite3')
-const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
@@ -79,6 +78,7 @@ function createInterfaceItems($, onlineUrl) {
   const items = [];
   for (const interfaceEl of interfaceEls) {
     let interfaceDesc = interfaceEl.next.children[0].data;
+    interfaceDesc = interfaceDesc || '';
     // 考虑到美观，做些数据处理
     interfaceDesc = interfaceDesc.replace(/。$/, '');
     const interfaceName = interfaceEl.attribs.id;
@@ -152,9 +152,13 @@ async function createDB() {
 function fillSearchIndex(items) {
   return new Promise(resolve => {
     items.forEach(function (item, index) {
-      const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
-      stmt.all(item.name, item.type, item.path);
-      console.log(`${item.name}-${item.type} write to index success`);
+      try {
+        const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
+        stmt.all(item.name, item.type, item.path);
+        console.log(`${item.name}-${item.type} write to index success`);
+      } catch (e) {
+        console.error(e);
+      }
       if (index === items.length - 1) {
         resolve();
       }
