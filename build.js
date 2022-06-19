@@ -8,8 +8,8 @@ const path = require('path');
 const cheerio = require('cheerio');
 
 const options = {
-  sourceDir: path.join(__dirname + '/test', 'cloud.tencent.com', 'document'), // HTML源文件
-  docsetDir: path.join(__dirname + '/tcapi.docset'), // docset目标文件夹
+  sourceDir: path.join(__dirname, 'source-html', 'cloud.tencent.com', 'document'), // HTML源文件
+  docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
   contentsDir: null, resourceDir: null,
 };
 const homePage = 'https://cloud.tencent.com/document';
@@ -29,9 +29,12 @@ function copyDocumentation() {
 }
 
 (async function main() {
+  console.log('Generate Docset start');
+  console.time('docset');
   const items = copyDocumentation();
   copyConfigFiles();
   await createSqlLiteDB(items);
+  console.timeEnd('docset');
   console.log('Generate Docset Successfully! ')
 })();
 
@@ -63,13 +66,15 @@ function processDocumentationFile(file) {
   let functionNameCN = $('.rno-title-module-title').text();
 
   let onlineUrl = `${homePage}/${relativeFilepath.replace(/.html$/, '')}`;
-  if (functionNameCN === 'API 概览') {
+  if (functionNameCN === 'API 概览' && $('.rno-header-crumbs-link-2')[2]) {
     items.push({
       name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Module', path: onlineUrl
     });
-    return items;
-  }
-  if (functionName) {
+  } else if (functionNameCN === '简介' && $('.rno-header-crumbs-link-2')[2]) {
+    items.push({
+      name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Guide', path: onlineUrl
+    });
+  } else if (functionName) {
     items.push({
       name: `${functionName[0]}(${functionNameCN})`, type: 'Method', path: onlineUrl
     })
