@@ -4,3 +4,4 @@ tcapi.docset
 source-html
 tcapi.docset
 node_modules
+ .DS_Store
