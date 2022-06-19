@@ -4,6 +4,9 @@
 
 API例子：https://cloud.tencent.com/document/api/213/15749
 
+
+![](./docs/screenshot.gif)
+
 ## 制作流程
 
 ```shell
