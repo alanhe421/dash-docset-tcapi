@@ -24,6 +24,6 @@ tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 ```
 
 ## 订阅地址
-https://github.com/alanhg/dash-docset-tcapi/blob/main/feed.xml
+https://raw.githubusercontent.com/alanhg/dash-docset-tcapi/main/feed.xml
 
 
