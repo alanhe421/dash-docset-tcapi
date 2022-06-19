@@ -5,6 +5,8 @@ const sqlite3 = require('sqlite3')
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
+const cheerio = require('cheerio');
+
 const options = {
   sourceDir: path.join(__dirname + '/test', 'cloud.tencent.com', 'document'), // HTML源文件
   docsetDir: path.join(__dirname + '/tcapi.docset'), // docset目标文件夹
@@ -51,15 +53,25 @@ function processDocumentationFile(file) {
     return items;
   }
   let content = fs.readFileSync(file, 'utf-8');
+  const $ = cheerio.load(content);
   let relativeFilepath = file.replace(options.sourceDir + '/', '');
   /**
    * 函数名称
    */
   let functionNameRegex = /(?<=Action=)[A-Za-z\d]+/;
   let functionName = content.match(functionNameRegex)
+  let functionNameCN = $('.rno-title-module-title').text();
+
+  let onlineUrl = `${homePage}/${relativeFilepath.replace(/.html$/, '')}`;
+  if (functionNameCN === 'API 概览') {
+    items.push({
+      name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Module', path: onlineUrl
+    });
+    return items;
+  }
   if (functionName) {
     items.push({
-      name: functionName[0], type: 'Section', path: `${homePage}/${relativeFilepath.replace(/.html$/, '')}`
+      name: `${functionNameCN}(${functionName[0]})`, type: 'Method', path: onlineUrl
     })
   }
   return items
