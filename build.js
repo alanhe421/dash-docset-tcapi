@@ -6,6 +6,7 @@ const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
+const childProcess = require('child_process');
 
 const options = {
   sourceDir: path.join(__dirname, 'test', 'cloud.tencent.com', 'document'), // HTML源文件
@@ -18,6 +19,7 @@ options.ResourcesDir = path.join(options.contentsDir, 'Resources');
 options.DocumentsDir = path.join(options.ResourcesDir, 'Documents');
 
 sqlite3.verbose();
+let db;
 
 function copyDocumentation() {
   let items = [];
@@ -31,9 +33,13 @@ function copyDocumentation() {
 (async function main() {
   console.log('Generate Docset start');
   console.time('Docset making');
-  const items = copyDocumentation();
+
+  initDocsetFile();
   copyConfigFiles();
-  await createSqlLiteDB(items);
+  await createDB();
+  const items = copyDocumentation();
+  await fillSearchIndex(items);
+
   console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
@@ -82,6 +88,16 @@ function processDocumentationFile(file) {
   return items
 }
 
+async function createDB() {
+  let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
+  if (fs.existsSync(sqlFile)) {
+    fs.unlinkSync(sqlFile);
+  }
+  db = new sqlite3.Database(sqlFile);
+  let query = ['CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);', 'CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);'].join(' ');
+  await db.exec(query);
+}
+
 /**
  * 入口名称比如查询一个类，这就是类名称
  * Dash可以识别的类型，见
@@ -89,18 +105,18 @@ function processDocumentationFile(file) {
  * @param items
  * @returns {Promise<void>}
  */
-async function createSqlLiteDB(items) {
-  let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
-  if (fs.existsSync(sqlFile)) {
-    fs.unlinkSync(sqlFile);
-  }
-  const db = new sqlite3.Database(sqlFile);
-  let query = ['CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);', 'CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);'].join(' ');
+function fillSearchIndex(items) {
+  return new Promise(resolve => {
+    items.forEach(function (item, index) {
+      const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
+      stmt.all(item.name, item.type, item.path);
+      if (index === items.length - 1) {
+        resolve();
+      }
+    });
+  })
+}
 
-  await db.exec(query);
-
-  _.each(items, function (item) {
-    const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
-    stmt.all(item.name, item.type, item.path)
-  });
+function initDocsetFile() {
+  childProcess.execSync('mkdir -p tcapi.docset/Contents/Resources/Documents/');
 }
