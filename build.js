@@ -71,7 +71,7 @@ function processDocumentationFile(file) {
   }
   if (functionName) {
     items.push({
-      name: `${functionNameCN}(${functionName[0]})`, type: 'Method', path: onlineUrl
+      name: `${functionName[0]}(${functionNameCN})`, type: 'Method', path: onlineUrl
     })
   }
   return items
