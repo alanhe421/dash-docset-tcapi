@@ -23,9 +23,13 @@ vi Info.plist
 tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 ```
 
-## 订阅地址
+## Dash中订阅文档🔔
 
-[订阅🔔](dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Falanhg%2Fdash-docset-tcapi%2Fmain%2Ffeed.xml)
+浏览器地址栏输入以下地址回车
+
+```
+dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Falanhg%2Fdash-docset-tcapi%2Fmain%2Ffeed.xml
+```
 
 
 
