@@ -21,13 +21,11 @@ options.DocumentsDir = path.join(options.ResourcesDir, 'Documents');
 sqlite3.verbose();
 let db;
 
-function copyDocumentation() {
-  let items = [];
+async function parseDocumentationAndFillSearchIndex() {
   const files = fs.readdirSync(options.sourceDir);
-  _.each(files, function (file) {
-    items = _.union(items, processDocumentationFile(path.join(options.sourceDir, file)));
-  });
-  return items;
+  for (const file of files) {
+    await processDocumentationFile(path.join(options.sourceDir, file))
+  }
 }
 
 (async function main() {
@@ -37,8 +35,7 @@ function copyDocumentation() {
   initDocsetFile();
   copyConfigFiles();
   await createDB();
-  const items = copyDocumentation();
-  await fillSearchIndex(items);
+  await parseDocumentationAndFillSearchIndex();
 
   console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
@@ -52,14 +49,15 @@ function copyConfigFiles() {
 /**
  * 只处理HTML文件
  */
-function processDocumentationFile(file) {
-  const items = [];
+async function processDocumentationFile(file) {
   if (fs.lstatSync(file).isDirectory()) {
-    fs.readdirSync(file).forEach(f => items.push(...processDocumentationFile(path.join(file, f))))
-    return items;
+    for (const f of fs.readdirSync(file)) {
+      await processDocumentationFile(path.join(file, f));
+    }
+    return;
   }
   if (!file.match(/.html$/)) {
-    return items;
+    return;
   }
   let content = fs.readFileSync(file, 'utf-8');
   const $ = cheerio.load(content);
@@ -70,6 +68,7 @@ function processDocumentationFile(file) {
   let functionNameRegex = /(?<=Action=)[A-Za-z\d]+/;
   let functionName = content.match(functionNameRegex)
   let functionNameCN = $('.rno-title-module-title').text();
+  const items = [];
 
   let onlineUrl = `${homePage}/${relativeFilepath.replace(/.html$/, '')}`;
   if (functionNameCN === 'API 概览' && $('.rno-header-crumbs-link-2')[2]) {
@@ -85,7 +84,8 @@ function processDocumentationFile(file) {
       name: `${functionName[0]}(${functionNameCN})`, type: 'Method', path: onlineUrl
     })
   }
-  return items
+  items.length > 0 && await fillSearchIndex(items);
+  return
 }
 
 async function createDB() {
@@ -110,6 +110,7 @@ function fillSearchIndex(items) {
     items.forEach(function (item, index) {
       const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
       stmt.all(item.name, item.type, item.path);
+      console.log(`${item.name}-${item.type} write to index success`);
       if (index === items.length - 1) {
         resolve();
       }
