@@ -1,6 +1,13 @@
+#!/usr/bin/env node
+
+
 /**
  * 根据爬取的景HTML文件生成docset
  */
+const yargs = require('yargs/yargs')
+const {hideBin} = require('yargs/helpers')
+const argv = yargs(hideBin(process.argv)).argv;
+
 const sqlite3 = require('sqlite3')
 const _ = require('underscore');
 const fs = require('fs');
@@ -17,7 +24,7 @@ const homePage = 'https://cloud.tencent.com/document';
 options.contentsDir = path.join(options.docsetDir, 'Contents');
 options.ResourcesDir = path.join(options.contentsDir, 'Resources');
 options.DocumentsDir = path.join(options.ResourcesDir, 'Documents');
-
+let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
 sqlite3.verbose();
 let db;
 
@@ -32,11 +39,25 @@ async function parseDocumentationAndFillSearchIndex() {
   console.log('Generate Docset start');
   console.time('Docset making');
 
-  initDocsetFile();
-  copyConfigFiles();
-  await createDB();
-  await parseDocumentationAndFillSearchIndex();
-
+  // 初始化项目
+  if (argv.init) {
+    initDocsetFile();
+    copyConfigFiles();
+    if (fs.existsSync(sqlFile)) {
+      fs.unlinkSync(sqlFile);
+    }
+    connectDB();
+    await createDB();
+  }
+  // 拉取新站点
+  if (argv.crawl) {
+    crawlSite(argv.crawl);
+  }
+  // 添加新索引
+  if (argv.addIndex) {
+    connectDB();
+    await parseDocumentationAndFillSearchIndex();
+  }
   console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
@@ -88,12 +109,11 @@ async function processDocumentationFile(file) {
   return
 }
 
-async function createDB() {
-  let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
-  if (fs.existsSync(sqlFile)) {
-    fs.unlinkSync(sqlFile);
-  }
+function connectDB() {
   db = new sqlite3.Database(sqlFile);
+}
+
+async function createDB() {
   let query = ['CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);', 'CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);'].join(' ');
   await db.exec(query);
 }
@@ -120,4 +140,13 @@ function fillSearchIndex(items) {
 
 function initDocsetFile() {
   childProcess.execSync('mkdir -p tcapi.docset/Contents/Resources/Documents/');
+}
+
+/**
+ * 抓取目标网页数据
+ * @param site
+ */
+function crawlSite(site) {
+  childProcess.execSync('WGET_CMD=$(which wget)\n' + '\n' + 'if [[ ! -z $WGET_CMD ]]; then\n' + '    brew install wget\n' + 'fi', {stdio: 'inherit'});
+  childProcess.execSync(`wget -nc -np --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension -r '${site}'`, {stdio: 'inherit'});
 }
