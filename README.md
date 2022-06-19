@@ -19,6 +19,11 @@ vi Info.plist
 # 根据source-html，更新索引数据
 ./build.js --addIndex=true
 
+# 打包
+tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 ```
+
+## 订阅地址
+https://github.com/alanhg/dash-docset-tcapi/blob/main/feed.xml
 
 
