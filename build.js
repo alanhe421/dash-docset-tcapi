@@ -5,7 +5,6 @@ const sqlite3 = require('sqlite3')
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
-const cheerio = require('cheerio');
 const options = {
   sourceDir: path.join(__dirname + '/test', 'cloud.tencent.com', 'document'), // HTML源文件
   docsetDir: path.join(__dirname + '/tcapi.docset'), // docset目标文件夹
@@ -37,10 +36,6 @@ function copyDocumentation() {
 function copyConfigFiles() {
   fs.createReadStream('Info.plist').pipe(fs.createWriteStream(path.join(options.contentsDir, 'Info.plist')));
   fs.createReadStream('icon.png').pipe(fs.createWriteStream(path.join(options.docsetDir, 'icon.png')));
-  if (!fs.existsSync(path.join(options.DocumentsDir, '_static'))) {
-    fs.mkdirSync(path.join(options.DocumentsDir, '_static'));
-  }
-  fs.createReadStream('_static/documents-202205161915.css').pipe(fs.createWriteStream(path.join(options.DocumentsDir, '_static', '/documents-202205161915.css')));
 }
 
 /**
@@ -64,36 +59,10 @@ function processDocumentationFile(file) {
   let functionName = content.match(functionNameRegex)
   if (functionName) {
     items.push({
-      name: functionName[0], type: 'Section', path: relativeFilepath
+      name: functionName[0], type: 'Section', path: `${homePage}/${relativeFilepath.replace(/.html$/, '')}`
     })
   }
-  let relativePath = file.replace(options.sourceDir, '');
-  if (relativePath.includes('/')) {
-    fs.mkdirSync(path.join(options.DocumentsDir, relativePath.replace(/\/[^/]+$/, '')), {recursive: true});
-  }
-  fs.writeFileSync(path.join(options.DocumentsDir, relativePath), htmlProcess(content, relativePath))
   return items
-}
-
-/**
- * HTML处理
- * 删除部分DOM元素
- * 样式调整为本地资源路径
- */
-function htmlProcess(htmlCnt, relativePath) {
-  htmlCnt = htmlCnt.replace(/\/\/cloudcache.tencent-cloud.com\/open_proj\/proj_qcloud_v2\/platform\/documents\/css/g, '_static');
-  let $ = cheerio.load(htmlCnt);
-  // $('#qcportal-kit-topnav').remove();
-  $('.qc-scrollbar').remove();
-  $('script').remove();
-  $('a').each((_, link) => {
-    if (link.attribs.href && link.attribs.href.includes('/api')) {
-      link.attribs.href = link.attribs.href.replace(/\/document\/api/, 'api') + '.html';
-    }
-  });
-  // Support Online Redirection https://kapeli.com/docsets#onlineRedirection
-  $('html').append(`<!-- Online page at ${homePage}${relativePath.replace(/.html$/, '')} -->`)
-  return $.html();
 }
 
 /**

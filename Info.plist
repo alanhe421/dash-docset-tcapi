@@ -5,7 +5,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>tcapi</string>
 	<key>CFBundleName</key>
-	<string>tcapi</string>
+	<string>腾讯云API</string>
 	<key>DocSetPlatformFamily</key>
 	<string>tcapi</string>
 	<key>isDashDocset</key>
