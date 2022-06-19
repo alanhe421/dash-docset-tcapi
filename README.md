@@ -15,7 +15,7 @@ mkdir -p tcapi.docset/Contents/Resources/Documents/
 # 配置info.plist，参考例子https://kapeli.com/resources/Info.plist
 vi Info.plist
 
-# 生成索引数据
+# 生成dash索引数据
 node build.js
 ```
 
