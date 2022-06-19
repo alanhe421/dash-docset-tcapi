@@ -78,7 +78,9 @@ function createInterfaceItems($, onlineUrl) {
   const interfaceEls = $('#docArticleContent h2');
   const items = [];
   for (const interfaceEl of interfaceEls) {
-    const interfaceDesc = interfaceEl.next.children[0].data;
+    let interfaceDesc = interfaceEl.next.children[0].data;
+    // 考虑到美观，做些数据处理
+    interfaceDesc = interfaceDesc.replace(/。$/, '');
     const interfaceName = interfaceEl.attribs.id;
     items.push({
       name: `${interfaceName} > ${interfaceDesc}`, type: 'Interface', path: `${onlineUrl}#${interfaceName}`
