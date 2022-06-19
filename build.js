@@ -8,7 +8,7 @@ const path = require('path');
 const cheerio = require('cheerio');
 
 const options = {
-  sourceDir: path.join(__dirname, 'source-html', 'cloud.tencent.com', 'document'), // HTML源文件
+  sourceDir: path.join(__dirname, 'test', 'cloud.tencent.com', 'document'), // HTML源文件
   docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
   contentsDir: null, resourceDir: null,
 };
@@ -30,11 +30,11 @@ function copyDocumentation() {
 
 (async function main() {
   console.log('Generate Docset start');
-  console.time('docset');
+  console.time('Docset making');
   const items = copyDocumentation();
   copyConfigFiles();
   await createSqlLiteDB(items);
-  console.timeEnd('docset');
+  console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
 
