@@ -83,7 +83,7 @@ function createInterfaceItems($, onlineUrl) {
     interfaceDesc = interfaceDesc.replace(/。$/, '');
     const interfaceName = interfaceEl.attribs.id;
     items.push({
-      name: `${interfaceName} > ${interfaceDesc}`, type: 'Interface', path: `${onlineUrl}#${interfaceName}`
+      name: formatName(interfaceName, interfaceDesc), type: 'Interface', path: `${onlineUrl}#${interfaceName}`
     })
   }
   return items;
@@ -103,30 +103,34 @@ async function processDocumentationFile(file) {
     return;
   }
   let content = fs.readFileSync(file, 'utf-8');
-  const $ = cheerio.load(content);
+  const jquery = cheerio.load(content);
   let relativeFilepath = file.replace(options.sourceDir + '/', '');
   /**
    * 函数名称
    */
   let functionNameRegex = /(?<=Action=)[A-Za-z\d]+/;
   let functionName = content.match(functionNameRegex)
-  let functionNameCN = $('.rno-title-module-title').text();
+  let functionNameCN = jquery('.rno-title-module-title').text();
   const items = [];
 
   let onlineUrl = `${homePage}/${relativeFilepath.replace(/.html$/, '')}`;
-  if (functionNameCN === 'API 概览' && $('.rno-header-crumbs-link-2')[2]) {
+  if (functionNameCN === 'API 概览' && jquery('.rno-header-crumbs-link-2')[2]) {
     items.push({
-      name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Module', path: onlineUrl
+      name: `${formatName(jquery('.rno-header-crumbs-link-2')[2].attribs.title, functionNameCN)}`,
+      type: 'Module',
+      path: onlineUrl
     });
-  } else if (functionNameCN === '简介' && $('.rno-header-crumbs-link-2')[2]) {
+  } else if (functionNameCN === '简介' && jquery('.rno-header-crumbs-link-2')[2]) {
     items.push({
-      name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Guide', path: onlineUrl
+      name: `${formatName(jquery('.rno-header-crumbs-link-2')[2].attribs.title, functionNameCN)}`,
+      type: 'Guide',
+      path: onlineUrl
     });
   } else if (functionNameCN === '数据结构') {
-    items.push(...createInterfaceItems($, onlineUrl));
+    items.push(...createInterfaceItems(jquery, onlineUrl));
   } else if (functionName) {
     items.push({
-      name: `${functionName[0]} > ${functionNameCN})`, type: 'Method', path: onlineUrl
+      name: `${formatName(functionName[0], functionNameCN)}`, type: 'Method', path: onlineUrl
     })
   }
   items.length > 0 && await fillSearchIndex(items);
@@ -189,4 +193,8 @@ function clearSearchIndex() {
     stmt.all();
     resolve();
   })
+}
+
+function formatName(value1, value2) {
+  return `${value1} > ${value2}`;
 }
