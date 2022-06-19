@@ -126,7 +126,7 @@ async function processDocumentationFile(file) {
     items.push(...createInterfaceItems($, onlineUrl));
   } else if (functionName) {
     items.push({
-      name: `${functionName[0]}(${functionNameCN})`, type: 'Method', path: onlineUrl
+      name: `${functionName[0]} > ${functionNameCN})`, type: 'Method', path: onlineUrl
     })
   }
   items.length > 0 && await fillSearchIndex(items);
