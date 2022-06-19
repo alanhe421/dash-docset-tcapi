@@ -4,7 +4,6 @@
 
 API例子：https://cloud.tencent.com/document/api/213/15749
 
-
 ![](./docs/screenshot.gif)
 
 ## 制作流程
@@ -21,6 +20,9 @@ vi Info.plist
 
 # 根据source-html，更新索引数据
 ./build.js --addIndex=true
+
+# 清除索引数据
+./build.js --clearIndex=true
 
 # 打包
 tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset

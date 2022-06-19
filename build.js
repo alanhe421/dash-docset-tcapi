@@ -58,7 +58,10 @@ async function parseDocumentationAndFillSearchIndex() {
     connectDB();
     await parseDocumentationAndFillSearchIndex();
   }
-
+  if (argv.clearIndex) {
+    connectDB();
+    await clearSearchIndex();
+  }
   if (argv.syncConfig) {
     copyConfigFiles();
   }
@@ -69,6 +72,19 @@ async function parseDocumentationAndFillSearchIndex() {
 function copyConfigFiles() {
   fs.createReadStream('Info.plist').pipe(fs.createWriteStream(path.join(options.contentsDir, 'Info.plist')));
   fs.createReadStream('icon.png').pipe(fs.createWriteStream(path.join(options.docsetDir, 'icon.png')));
+}
+
+function createInterfaceItems($, onlineUrl) {
+  const interfaceEls = $('#docArticleContent h2');
+  const items = [];
+  for (const interfaceEl of interfaceEls) {
+    const interfaceDesc = interfaceEl.next.children[0].data;
+    const interfaceName = interfaceEl.attribs.id;
+    items.push({
+      name: `${interfaceName} > ${interfaceDesc}`, type: 'Interface', path: `${onlineUrl}#${interfaceName}`
+    })
+  }
+  return items;
 }
 
 /**
@@ -104,6 +120,8 @@ async function processDocumentationFile(file) {
     items.push({
       name: `${$('.rno-header-crumbs-link-2')[2].attribs.title} > ${functionNameCN}`, type: 'Guide', path: onlineUrl
     });
+  } else if (functionNameCN === '数据结构') {
+    items.push(...createInterfaceItems($, onlineUrl));
   } else if (functionName) {
     items.push({
       name: `${functionName[0]}(${functionNameCN})`, type: 'Method', path: onlineUrl
@@ -153,4 +171,16 @@ function initDocsetFile() {
 function crawlSite(site) {
   childProcess.execSync('WGET_CMD=$(which wget)\n' + '\n' + 'if [[ ! -z $WGET_CMD ]]; then\n' + '    brew install wget\n' + 'fi', {stdio: 'inherit'});
   childProcess.execSync(`wget -nc -np --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension -r '${site}'`, {stdio: 'inherit'});
+}
+
+/**
+ * 清除搜索索引数据
+ * @returns {Promise<unknown>}
+ */
+function clearSearchIndex() {
+  return new Promise(resolve => {
+    const stmt = db.prepare('DELETE FROM searchIndex;');
+    stmt.all();
+    resolve();
+  })
 }
