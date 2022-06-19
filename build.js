@@ -58,6 +58,10 @@ async function parseDocumentationAndFillSearchIndex() {
     connectDB();
     await parseDocumentationAndFillSearchIndex();
   }
+
+  if (argv.syncConfig) {
+    copyConfigFiles();
+  }
   console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
