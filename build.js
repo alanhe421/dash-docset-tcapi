@@ -112,27 +112,27 @@ async function processDocumentationFile(file) {
   let functionName = content.match(functionNameRegex)
   let functionNameCN = jquery('.rno-title-module-title').text();
   const items = [];
-
   let onlineUrl = `${homePage}/${relativeFilepath.replace(/.html$/, '')}`;
-  if (functionNameCN === 'API 概览' && jquery('.rno-header-crumbs-link-2')[2]) {
-    items.push({
-      name: `${formatName(jquery('.rno-header-crumbs-link-2')[2].attribs.title, functionNameCN)}`,
-      type: 'Module',
-      path: onlineUrl
-    });
-  } else if (functionNameCN === '简介' && jquery('.rno-header-crumbs-link-2')[2]) {
-    items.push({
-      name: `${formatName(jquery('.rno-header-crumbs-link-2')[2].attribs.title, functionNameCN)}`,
-      type: 'Guide',
-      path: onlineUrl
-    });
-  } else if (functionNameCN === '数据结构') {
-    items.push(...createInterfaceItems(jquery, onlineUrl));
-  } else if (functionName) {
-    items.push({
-      name: `${formatName(functionName[0], functionNameCN)}`, type: 'Method', path: onlineUrl
-    })
+  const crumbs = jquery('.rno-header-crumbs-link-2'); // 文档中心 > API 中心 > 自动化助手 >
+  if (crumbs[2]) {
+    onlineUrl = `${onlineUrl}?product=${crumbs[2].attribs.title}`;
+    if (functionNameCN === 'API 概览') {
+      items.push({
+        name: `${formatName(crumbs[2].attribs.title, functionNameCN)}`, type: 'Module', path: onlineUrl
+      });
+    } else if (functionNameCN === '简介') {
+      items.push({
+        name: `${formatName(crumbs[2].attribs.title, functionNameCN)}`, type: 'Guide', path: onlineUrl
+      });
+    } else if (functionNameCN === '数据结构') {
+      items.push(...createInterfaceItems(jquery, onlineUrl));
+    } else if (functionName) {
+      items.push({
+        name: `${formatName(functionName[0], functionNameCN)}`, type: 'Method', path: onlineUrl
+      })
+    }
   }
+
   items.length > 0 && await fillSearchIndex(items);
   return
 }
