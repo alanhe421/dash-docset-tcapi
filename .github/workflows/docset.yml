@@ -45,3 +45,11 @@ jobs:
           message: Update workflow version
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ci-test
+      - name: Notify
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            *${{env.REPO_NAME}}* updated, see here(https://github.com/${{github.repository}}).
+          format: "markdown"
