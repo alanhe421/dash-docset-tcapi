@@ -25,6 +25,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        uses: actions/cache@v2.1.3
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: |
+          npm install
       - name: update docset
         run:  node ./build.js --create=true
       - name: Build
