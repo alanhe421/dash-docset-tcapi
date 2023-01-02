@@ -29,6 +29,10 @@ tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 
 # 同步配置文件Info.plist、icon.png
 ./build.js --syncConfig=true
+
+
+./build.js --create=true
+
 ```
 
 ## Dash中订阅文档🔔
@@ -43,4 +47,10 @@ dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Falanhg%2Fdash-docset-tcapi
 
 文档全量数据太多，因此当前只爬取了云服务器/轻量云服务器/自动化助手等部分文档，如需其它部分，可以自行执行命令，补充crawl参数，从而抓取其它栏目数据，并生成索引。
 
+API文档地址：https://cloud.tencent.com/document/api
+
+1. 云服务器：https://cloud.tencent.com/document/api/213
+2. 访问管理：https://cloud.tencent.com/document/api/598
+3. 轻量云服务器： https://cloud.tencent.com/document/api/1207
+4. 自动化助手：https://cloud.tencent.com/document/api/1340
 

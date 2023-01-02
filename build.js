@@ -64,6 +64,11 @@ async function parseDocumentationAndFillSearchIndex() {
   if (argv.syncConfig) {
     copyConfigFiles();
   }
+
+  if (argv.create) {
+    createDocSet();
+  }
+
   console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
@@ -197,4 +202,33 @@ function clearSearchIndex() {
 
 function formatName(value1, value2) {
   return `${value1} > ${value2}`;
+}
+
+async function createDocSet() {
+  childProcess.execSync(`rm -rf source-html`);
+  childProcess.execSync(`mkdir -p source-html`);
+  const productNums = fs.readFileSync(path.join(__dirname, 'products.txt'), {encoding: 'utf-8'}).split('\n').filter(item => item);
+
+  // 初始化DB
+  initDocsetFile();
+  copyConfigFiles();
+  if (fs.existsSync(sqlFile)) {
+    fs.unlinkSync(sqlFile);
+  }
+  connectDB();
+  await createDB();
+
+  // 拉取目标产品HTML源文件
+  for (const productNumsKey of productNums) {
+    crawlSite(`https://cloud.tencent.com/document/api/${productNumsKey}`);
+  }
+
+  // 处理非目标产品HTML源文件
+  fs.readdirSync(options.sourceDir).forEach((file) => {
+    const b = productNums.some(productNumsKey => productNumsKey === file || productNumsKey === file.replace(/.html$/, ''));
+    console.log(b);
+    if (!b) {
+      childProcess.execSync(`rm -rf ${options.sourceDir}/${file}`);
+    }
+  });
 }
