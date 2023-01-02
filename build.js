@@ -74,8 +74,8 @@ async function parseDocumentationAndFillSearchIndex() {
 })();
 
 function copyConfigFiles() {
-  fs.createReadStream('Info.plist').pipe(fs.createWriteStream(path.join(options.contentsDir, 'Info.plist')));
-  fs.createReadStream('icon.png').pipe(fs.createWriteStream(path.join(options.docsetDir, 'icon.png')));
+  fs.copyFileSync('Info.plist', path.join(options.contentsDir, 'Info.plist'));
+  fs.copyFileSync('icon.png', path.join(options.docsetDir, 'icon.png'));
 }
 
 function createInterfaceItems($, onlineUrl) {
@@ -204,6 +204,9 @@ function formatName(value1, value2) {
   return `${value1} > ${value2}`;
 }
 
+/**
+ * 完整的docset创建流程
+ */
 async function createDocSet() {
   childProcess.execSync(`rm -rf source-html`);
   childProcess.execSync(`mkdir -p source-html`);
@@ -220,15 +223,26 @@ async function createDocSet() {
 
   // 拉取目标产品HTML源文件
   for (const productNumsKey of productNums) {
-    crawlSite(`https://cloud.tencent.com/document/api/${productNumsKey}`);
+    try {
+      crawlSite(`https://cloud.tencent.com/document/api/${productNumsKey}`);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // 处理非目标产品HTML源文件
-  fs.readdirSync(options.sourceDir).forEach((file) => {
+  const htmlPath = path.join(options.sourceDir, 'api');
+  for (const file of fs.readdirSync(htmlPath)) {
     const b = productNums.some(productNumsKey => productNumsKey === file || productNumsKey === file.replace(/.html$/, ''));
     console.log(b);
     if (!b) {
-      childProcess.execSync(`rm -rf ${options.sourceDir}/${file}`);
+      childProcess.execSync(`rm -rf ${htmlPath}/${file}`);
     }
-  });
+  }
+
+  // 生成搜索索引
+  await parseDocumentationAndFillSearchIndex();
+
+  // 打包
+  childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
 }
