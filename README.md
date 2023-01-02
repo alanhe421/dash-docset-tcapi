@@ -9,6 +9,11 @@ API例子：https://cloud.tencent.com/document/api/213/15749
 ## 制作流程
 
 ```shell
+
+# 完整docset制作
+./build.js --create=true
+
+
 # 初始化docset,索引DB重新创建
 ./build.js --init=true
 
@@ -29,9 +34,6 @@ tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 
 # 同步配置文件Info.plist、icon.png
 ./build.js --syncConfig=true
-
-
-./build.js --create=true
 
 ```
 
