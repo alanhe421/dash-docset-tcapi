@@ -20,6 +20,7 @@
   "homepage": "https://github.com/alanhg/dash-docset-tcapi#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.11",
+    "fast-xml-parser": "^4.0.12",
     "sqlite3": "^5.0.8",
     "yargs": "^17.5.1"
   }

@@ -35,6 +35,8 @@ tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 # 同步配置文件Info.plist、icon.png
 ./build.js --syncConfig=true
 
+
+./build.js --updateVersion=true
 ```
 
 ## Dash中订阅文档🔔

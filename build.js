@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
 const childProcess = require('child_process');
+const {XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
 
 const options = {
   sourceDir: path.join(__dirname, 'source-html', 'cloud.tencent.com', 'document'), // HTML源文件
@@ -67,6 +68,9 @@ async function parseDocumentationAndFillSearchIndex() {
 
   if (argv.create) {
     createDocSet();
+  }
+  if (argv.updateVersion) {
+    updateVersion();
   }
 
   console.timeEnd('Docset making');
@@ -245,4 +249,23 @@ async function createDocSet() {
 
   // 打包
   childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
+
+  // updateVersion
+  updateVersion();
+}
+
+
+function updateVersion() {
+  let xmlPath = path.join(__dirname, 'feed.xml');
+  const xmldata = fs.readFileSync(xmlPath, {encoding: 'utf-8'});
+  const parser = new XMLParser();
+  let jObj = parser.parse(xmldata);
+
+  console.log('Class: updateVersion, Function: updateVersion, Line 261, Param: jObj', jObj);
+
+  const builder = new XMLBuilder();
+  let now = new Date();
+  jObj.entry.version = [now.getFullYear(), now.getMonth() + 1, now.getTime(),].join('.');
+  const xmlContent = builder.build(jObj);
+  fs.writeFileSync(xmlPath, xmlContent, {encoding: 'utf-8'});
 }
