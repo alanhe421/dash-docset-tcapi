@@ -49,7 +49,7 @@ jobs:
       - name: Deploy GitHub
         uses: actions-js/push@master
         with:
-          message: Update workflow version
+          message: Update docset version
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ci-test
       - name: Notify
