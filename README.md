@@ -41,7 +41,7 @@ tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset
 
 ## Dash中订阅文档🔔
 
-浏览器地址栏输入以下地址回车
+已接入CI，每周自动更新。浏览器地址栏输入以下地址回车。
 
 ```
 dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Falanhg%2Fdash-docset-tcapi%2Fmain%2Ffeed.xml
@@ -49,7 +49,7 @@ dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Falanhg%2Fdash-docset-tcapi
 
 ## 说明
 
-文档全量数据太多，因此当前只爬取了云服务器/轻量云服务器/自动化助手等部分文档，如需其它部分，可以自行执行命令，补充crawl参数，从而抓取其它栏目数据，并生成索引。
+文档全量数据太多，这里按需只爬取了云服务器/轻量云服务器/自动化助手等部分文档，如需其它部分，可以fork repo手动修改products.txt。
 
 API文档地址：https://cloud.tencent.com/document/api
 
