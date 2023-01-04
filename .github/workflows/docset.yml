@@ -51,7 +51,7 @@ jobs:
         with:
           message: Update docset version
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ci-test
+          branch: main
       - name: Notify
         uses: appleboy/telegram-action@master
         with:
