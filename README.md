@@ -1,5 +1,8 @@
 # dash-docset-tcapi
 
+
+[![Docset Recreate](https://github.com/alanhg/dash-docset-tcapi/actions/workflows/docset.yml/badge.svg?branch=main)](https://github.com/alanhg/dash-docset-tcapi/actions/workflows/docset.yml)
+
 腾讯云API文档，云API文档地址：https://cloud.tencent.com/document/api
 
 API例子：https://cloud.tencent.com/document/api/213/15749
