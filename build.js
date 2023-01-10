@@ -209,6 +209,18 @@ function formatName(value1, value2) {
 }
 
 /**
+ * 参考大小是347KB
+ */
+function tarDocset() {
+  let size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
+  console.log('tar docset，之前大小是', size);
+  childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
+  // 获取文件大小
+  size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
+  console.log('tar docset 最新大小是', size);
+}
+
+/**
  * 完整的docset创建流程
  */
 async function createDocSet() {
@@ -248,7 +260,7 @@ async function createDocSet() {
   await parseDocumentationAndFillSearchIndex();
 
   // 打包
-  childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
+  tarDocset();
 
   // updateVersion
   updateVersion();
@@ -261,11 +273,12 @@ function updateVersion() {
   const parser = new XMLParser();
   let jObj = parser.parse(xmldata);
 
-  console.log('Class: updateVersion, Function: updateVersion, Line 261, Param: jObj', jObj);
-
+  console.log('updateVersion,之前版本是', jObj);
   const builder = new XMLBuilder();
   let now = new Date();
   jObj.entry.version = [now.getFullYear(), now.getMonth() + 1, now.getTime(),].join('.');
+
+  console.log('updateVersion,新版本是', jObj);
   const xmlContent = builder.build(jObj);
   fs.writeFileSync(xmlPath, xmlContent, {encoding: 'utf-8'});
 }
