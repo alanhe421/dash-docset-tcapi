@@ -168,7 +168,7 @@ function fillSearchIndex(items) {
       try {
         const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
         stmt.all(item.name, item.type, item.path);
-        console.log(`${item.name}-${item.type} write to index success`);
+        // console.log(`${item.name}-${item.type} write to index success`);
       } catch (e) {
         console.error(e);
       }
