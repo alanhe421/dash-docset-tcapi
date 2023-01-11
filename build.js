@@ -13,10 +13,10 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
 const childProcess = require('child_process');
-const {XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
+const {XMLParser, XMLBuilder} = require("fast-xml-parser");
 
 const options = {
-  sourceDir: path.join(__dirname, 'source-html', 'cloud.tencent.com', 'document'), // HTML源文件
+  sourceDir: path.join(__dirname, 'source-html','document'), // HTML源文件
   docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
   contentsDir: null, resourceDir: null,
 };
