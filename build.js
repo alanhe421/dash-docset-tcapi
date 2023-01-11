@@ -189,7 +189,7 @@ function initDocsetFile() {
  */
 function crawlSite(site) {
   childProcess.execSync('WGET_CMD=$(which wget)\n' + '\n' + 'if [[ ! -z $WGET_CMD ]]; then\n' + '    brew install wget\n' + 'fi', {stdio: 'inherit'});
-  const command = `wget -np -r -l inf -nH -nc  -R index.html* --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension '${site}' `;
+  const command = `wget --quiet -np -r -l inf -nH -nc  -R index.html* --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension '${site}' `;
 
   console.log('执行爬取网页命令如下\n', command);
   childProcess.execSync(command, {stdio: 'inherit'});
