@@ -229,8 +229,6 @@ function tarDocset() {
 async function createDocSet() {
   childProcess.execSync(`rm -rf source-html`);
   childProcess.execSync(`mkdir -p source-html`);
-  const productNums = fs.readFileSync(path.join(__dirname, 'products.txt'), {encoding: 'utf-8'}).split('\n').filter(item => item);
-
   // 初始化DB
   initDocsetFile();
   copyConfigFiles();
@@ -240,6 +238,7 @@ async function createDocSet() {
   connectDB();
   await createDB();
 
+  const productNums = fs.readFileSync(path.join(__dirname, 'products.txt'), {encoding: 'utf-8'}).split('\n').filter(item => item);
   // 拉取目标产品HTML源文件
   for (const productNumsKey of productNums) {
     try {
