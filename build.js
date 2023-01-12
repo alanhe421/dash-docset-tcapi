@@ -16,7 +16,7 @@ const childProcess = require('child_process');
 const {XMLParser, XMLBuilder} = require("fast-xml-parser");
 
 const options = {
-  sourceDir: path.join(__dirname, 'source-html','document'), // HTML源文件
+  sourceDir: path.join(__dirname, 'source-html', 'document'), // HTML源文件
   docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
   contentsDir: null, resourceDir: null,
 };
@@ -37,7 +37,7 @@ async function parseDocumentationAndFillSearchIndex() {
 
 (async function main() {
   console.log('Generate Docset start');
-  console.time('Docset making');
+  // console.time('Docset making');
 
   // 初始化项目
   if (argv.init) {
@@ -47,7 +47,7 @@ async function parseDocumentationAndFillSearchIndex() {
       fs.unlinkSync(sqlFile);
     }
     connectDB();
-    await createDB();
+    await createDBTable();
   }
   // 拉取新站点
   if (argv.crawl) {
@@ -73,7 +73,7 @@ async function parseDocumentationAndFillSearchIndex() {
     updateVersion();
   }
 
-  console.timeEnd('Docset making');
+  // console.timeEnd('Docset making');
   console.log('Generate Docset Successfully! ')
 })();
 
@@ -150,7 +150,7 @@ function connectDB() {
   db = new sqlite3.Database(sqlFile);
 }
 
-async function createDB() {
+async function createDBTable() {
   let query = ['CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);', 'CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);'].join(' ');
   await db.exec(query);
 }
@@ -168,11 +168,10 @@ function fillSearchIndex(items) {
       try {
         const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
         stmt.all(item.name, item.type, item.path);
-        // console.log(`${item.name}-${item.type} write to index success`);
+        console.log(`${item.name}-${item.type} write to index success`);
       } catch (e) {
         console.error(e);
-      }
-      if (index === items.length - 1) {
+      } finally {
         resolve();
       }
     });
@@ -189,7 +188,7 @@ function initDocsetFile() {
  */
 function crawlSite(site) {
   childProcess.execSync('WGET_CMD=$(which wget)\n' + '\n' + 'if [[ ! -z $WGET_CMD ]]; then\n' + '    brew install wget\n' + 'fi', {stdio: 'inherit'});
-  const command = `wget --quiet -np -r -l inf -nH -nc  -R index.html* --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension '${site}' `;
+  const command = `wget -np -r -l inf -nH -nc  -R index.html* --compression=gzip --domains=cloud.tencent.com -e robots=off -P ./source-html --adjust-extension '${site}' `;
 
   console.log('执行爬取网页命令如下\n', command);
   childProcess.execSync(command, {stdio: 'inherit'});
@@ -223,26 +222,12 @@ function tarDocset() {
   console.log('tar docset 最新大小是', size);
 }
 
-/**
- * 完整的docset创建流程
- */
-async function createDocSet() {
-  childProcess.execSync(`rm -rf source-html`);
-  childProcess.execSync(`mkdir -p source-html`);
-  // 初始化DB
-  initDocsetFile();
-  copyConfigFiles();
-  if (fs.existsSync(sqlFile)) {
-    fs.unlinkSync(sqlFile);
-  }
-  connectDB();
-  await createDB();
-
+function crawlSitesByProductNum() {
   const productNums = fs.readFileSync(path.join(__dirname, 'products.txt'), {encoding: 'utf-8'}).split('\n').filter(item => item);
   // 拉取目标产品HTML源文件
   for (const productNumsKey of productNums) {
     try {
-      crawlSite(`https://cloud.tencent.com/document/api/${productNumsKey}`);
+      crawlSite(`https://cloud.tencent.com/document/api/${productNumsKey}/`);
     } catch (e) {
       console.error(e);
     }
@@ -257,8 +242,25 @@ async function createDocSet() {
       childProcess.execSync(`rm -rf ${htmlPath}/${file}`);
     }
   }
+}
 
-  // 生成搜索索引
+/**
+ * 完整的docset创建流程
+ */
+async function createDocSet() {
+  childProcess.execSync(`rm -rf source-html`);
+  childProcess.execSync(`mkdir -p source-html`);
+  // 初始化DB
+  initDocsetFile();
+  copyConfigFiles();
+  if (fs.existsSync(sqlFile)) {
+    fs.unlinkSync(sqlFile);
+  }
+  connectDB();
+  await createDBTable();
+
+  crawlSitesByProductNum();
+  // // 生成搜索索引
   await parseDocumentationAndFillSearchIndex();
 
   // 打包
