@@ -18,12 +18,11 @@ const {XMLParser, XMLBuilder} = require("fast-xml-parser");
 const options = {
   sourceDir: path.join(__dirname, 'source-html', 'document'), // HTML源文件
   docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
-  contentsDir: null, resourceDir: null,
+  contentsDir: path.join(__dirname, 'tcapi.docset', 'Contents'),
+  resourceDir: path.join(__dirname, 'tcapi.docset', 'Contents', 'Resources'),
+  DocumentsDir:path.join(__dirname, 'tcapi.docset', 'Contents', 'Resources', 'Documents')
 };
 const homePage = 'https://cloud.tencent.com/document';
-options.contentsDir = path.join(options.docsetDir, 'Contents');
-options.ResourcesDir = path.join(options.contentsDir, 'Resources');
-options.DocumentsDir = path.join(options.ResourcesDir, 'Documents');
 let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
 sqlite3.verbose();
 let db;
@@ -74,7 +73,7 @@ async function parseDocumentationAndFillSearchIndex() {
   }
 
   // console.timeEnd('Docset making');
-  console.log('Generate Docset Successfully! ')
+  // console.log('Generate Docset Successfully! ')
 })();
 
 function copyConfigFiles() {
@@ -143,7 +142,6 @@ async function processDocumentationFile(file) {
   }
 
   items.length > 0 && await fillSearchIndex(items);
-  return
 }
 
 function connectDB() {
@@ -152,7 +150,14 @@ function connectDB() {
 
 async function createDBTable() {
   let query = ['CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);', 'CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);'].join(' ');
-  await db.exec(query);
+  try {
+    await new Promise((resolve, reject) => db.exec(query, (err) => {
+      err ? reject(err) : resolve();
+    }));
+  } catch (e) {
+    throw e;
+  }
+  console.log('Create DB Table Successfully!');
 }
 
 /**
@@ -179,6 +184,10 @@ function fillSearchIndex(items) {
 }
 
 function initDocsetFile() {
+  if (fs.existsSync(options.docsetDir)) {
+    console.log('Docset dir already exists, remove it first');
+    childProcess.execSync(`rm -rf '${options.docsetDir}'`);
+  }
   childProcess.execSync('mkdir -p tcapi.docset/Contents/Resources/Documents/');
 }
 
