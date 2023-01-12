@@ -8,7 +8,7 @@ const yargs = require('yargs/yargs')
 const {hideBin} = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv;
 
-const sqlite3 = require('sqlite3')
+const sqlite3 = require('sqlite3').verbose()
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
@@ -20,10 +20,10 @@ const options = {
   docsetDir: path.join(__dirname, 'tcapi.docset'), // docset目标文件夹
   contentsDir: path.join(__dirname, 'tcapi.docset', 'Contents'),
   resourceDir: path.join(__dirname, 'tcapi.docset', 'Contents', 'Resources'),
-  DocumentsDir:path.join(__dirname, 'tcapi.docset', 'Contents', 'Resources', 'Documents')
+  DocumentsDir: path.join(__dirname, 'tcapi.docset', 'Contents', 'Resources', 'Documents')
 };
 const homePage = 'https://cloud.tencent.com/document';
-let sqlFile = path.join(options.ResourcesDir, 'docSet.dsidx');
+let sqlFile = path.join(options.resourceDir, 'docSet.dsidx');
 sqlite3.verbose();
 let db;
 
@@ -223,8 +223,11 @@ function formatName(value1, value2) {
  * 参考大小是347KB
  */
 function tarDocset() {
-  let size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
-  console.log('tar docset，之前大小是', size);
+  let size;
+  if (fs.existsSync(path.join(__dirname, 'tcapi.tgz'))) {
+    size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
+    console.log('tar docset，之前大小是', size);
+  }
   childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
   // 获取文件大小
   size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
