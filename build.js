@@ -169,17 +169,17 @@ async function createDBTable() {
  */
 function fillSearchIndex(items) {
   return new Promise(resolve => {
-    items.forEach(function (item, index) {
-      try {
-        const stmt = db.prepare('INSERT INTO searchIndex(name, type, path) VALUES (?, ?, ?)');
-        stmt.all(item.name, item.type, item.path);
-        console.log(`${item.name}-${item.type} write to index success`);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        resolve();
-      }
-    });
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      db.run(`INSERT INTO searchIndex(name, type, path) VALUES ('${item.name}', '${item.type}', '${item.path}')`, (err) => {
+        if (!err) {
+          console.log(`${item.name}-${item.type} write to index success`);
+        }
+        if (i === items.length - 1) {
+          resolve();
+        }
+      });
+    }
   })
 }
 
@@ -228,6 +228,7 @@ function tarDocset() {
     size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
     console.log('tar docset，之前大小是', size);
   }
+
   childProcess.execSync(`tar --exclude='.DS_Store' -cvzf tcapi.tgz tcapi.docset`);
   // 获取文件大小
   size = fs.statSync(path.join(__dirname, 'tcapi.tgz')).size;
@@ -262,6 +263,9 @@ function crawlSitesByProductNum() {
 async function createDocSet() {
   childProcess.execSync(`rm -rf source-html`);
   childProcess.execSync(`mkdir -p source-html`);
+
+  crawlSitesByProductNum();
+
   // 初始化DB
   initDocsetFile();
   copyConfigFiles();
@@ -271,7 +275,6 @@ async function createDocSet() {
   connectDB();
   await createDBTable();
 
-  crawlSitesByProductNum();
   // // 生成搜索索引
   await parseDocumentationAndFillSearchIndex();
 
