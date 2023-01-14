@@ -60,4 +60,5 @@ API文档地址：https://cloud.tencent.com/document/api
 2. 访问管理：https://cloud.tencent.com/document/api/598
 3. 轻量云服务器： https://cloud.tencent.com/document/api/1207
 4. 自动化助手：https://cloud.tencent.com/document/api/1340
+5. 私有网络：https://cloud.tencent.com/document/api/215
 
